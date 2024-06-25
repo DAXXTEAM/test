@@ -91,8 +91,8 @@ def main():
     bot_token = "7266886772:AAEhY-yWQSEu7mxMWkJCJyesK_qgqPZlPks"
     application = Application.builder().token(bot_token).build()
 
-    # Handle command for file input
-    application.add_handler(MessageHandler(filters.Document.MimeType("text/plain") & filters.Command(".CVV"), process_cards))
+    # Handle command for file input, ensure command starts with / and then use regex for .CVV
+    application.add_handler(MessageHandler(filters.Document.MimeType("text/plain") & filters.Regex('^\.CVV$'), process_cards))
 
     application.run_polling()
 
