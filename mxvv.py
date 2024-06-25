@@ -43,7 +43,7 @@ async def check_cc(cc, amount, currency, bot, chat_id, username, vip_status, ret
     except requests.exceptions.RequestException as e:
         await bot.send_message(chat_id=chat_id, text=f"{cc} Request Exception: {str(e)}. Retrying...")
         if retry_count < MAX_RETRIES:
-            time.sleep(1)
+            time.sleep(3)
             await check_cc(cc, amount, currency, bot, chat_id, username, vip_status, retry_count + 1)
 
     except json.JSONDecodeError as e:
@@ -72,7 +72,7 @@ async def xvv(update: Update, context: CallbackContext):
         user_id = update.effective_user.id
         vip_status = "OWNER" if is_vip(user_id) else "FREE"
 
-        for cc in args[:10]:  # Limit to processing a maximum of 10 cards at a time
+        for cc in args[:100]:  # Limit to processing a maximum of 10 cards at a time
             formatted_cc = cc.replace('|', ':')
             await check_cc(formatted_cc, amount, currency, bot, chat_id, username, vip_status)
 
@@ -82,7 +82,7 @@ async def xvv(update: Update, context: CallbackContext):
         await update.message.reply_text("Error processing request: " + str(e))
 
 def main():
-    bot_token = "7266886772:AAFbSsQc2EiIXZ5XBoU2H7m9ci6mevp7LKQ"
+    bot_token = "7266886772:AAEhY-yWQSEu7mxMWkJCJyesK_qgqPZlPks"
     application = Application.builder().token(bot_token).build()
     application.add_handler(CommandHandler("mxvv", xvv))
     application.run_polling()
