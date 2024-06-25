@@ -94,7 +94,7 @@ def main():
     application.add_handler(CommandHandler("xvv", xvv))
 
     # Handle command for file input
-    application.add_handler(MessageHandler(filters.Document.MimeType("text/plain") & filters.Command(".CVV"), process_cards))
+    application.add_handler(MessageHandler(filters.Document.MimeType("text/plain") & filters.Command(".xvv"), process_cards))
 
     application.run_polling()
 
