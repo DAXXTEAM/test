@@ -2,7 +2,7 @@ import requests
 import time
 import json
 import os
-from telegram import Update, Message
+from telegram import Update
 from telegram.ext import CommandHandler, CallbackContext, Application, MessageHandler, filters
 
 MAX_RETRIES = 5
@@ -62,37 +62,35 @@ async def request_file(update: Update, context: CallbackContext):
     await update.message.reply_text("Please reply to this message with the TXT file containing the credit card details.")
 
 async def process_cards(update: Update, context: CallbackContext):
-    reply_to_message = update.message.reply_to_message
-    if not reply_to_message or reply_to_message.text != "Please reply to this message with the TXT file containing the credit card details.":
+    if update.message.reply_to_message and update.message.reply_to_message.text == "Please reply to this message with the TXT file containing the credit card details.":
+        document = update.message.document
+        if not document or document.mime_type != 'text/plain':
+            await update.message.reply_text("Please upload a valid TXT file.")
+            return
+        
+        amount = 3.0
+        currency = "usd"
+        bot = context.bot
+        chat_id = update.effective_chat.id
+        username = update.effective_user.username
+        user_id = update.effective_user.id
+        vip_status = "OWNER" if is_vip(user_id) else "FREE"
+
+        # Download the document
+        file = await bot.get_file(document.file_id)
+        file_path = file.download(custom_path="temp_cards.txt")
+
+        # Read and process each card from the file
+        with open(file_path, 'r') as file:
+            cards = file.readlines()
+        os.remove(file_path)  # Clean up the downloaded file
+
+        for cc in cards:
+            cc = cc.strip()
+            if cc:
+                await check_cc(cc.replace('|', ':'), amount, currency, bot, chat_id, username, vip_status)
+    else:
         await update.message.reply_text("Please send the TXT file as a reply to the bot's request message.")
-        return
-    
-    document = update.message.document
-    if not document or document.mime_type != 'text/plain':
-        await update.message.reply_text("Please upload a valid TXT file.")
-        return
-
-    amount = 3.0
-    currency = "usd"
-    bot = context.bot
-    chat_id = update.effective_chat.id
-    username = update.effective_user.username
-    user_id = update.effective_user.id
-    vip_status = "OWNER" if is_vip(user_id) else "FREE"
-
-    # Download the document
-    file = await bot.get_file(document.file_id)
-    file_path = file.download(custom_path="temp_cards.txt")
-
-    # Read and process each card from the file
-    with open(file_path, 'r') as file:
-        cards = file.readlines()
-    os.remove(file_path)  # Clean up the downloaded file
-
-    for cc in cards:
-        cc = cc.strip()
-        if cc:
-            await check_cc(cc.replace('|', ':'), amount, currency, bot, chat_id, username, vip_status)
 
 def main():
     bot_token = "7266886772:AAEhY-yWQSEu7mxMWkJCJyesK_qgqPZlPks"
@@ -101,8 +99,8 @@ def main():
     # Command to request file
     application.add_handler(CommandHandler("CVV", request_file))
     
-    # Handle file replies
-    application.add_handler(MessageHandler(filters.Document.MimeType("text/plain") & filters.Reply, process_cards))
+    # Handle file uploads that are replies
+    application.add_handler(MessageHandler(filters.Document.MimeType("text/plain"), process_cards))
 
     application.run_polling()
 
