@@ -2,7 +2,7 @@ import requests
 import time
 import json
 import os
-from telegram import Update
+from telegram import Update, Message
 from telegram.ext import CommandHandler, CallbackContext, Application, MessageHandler, filters
 
 MAX_RETRIES = 5
@@ -58,7 +58,15 @@ def is_vip(user_id):
         vip_users = file.readlines()
     return str(user_id) + "\n" in vip_users
 
+async def request_file(update: Update, context: CallbackContext):
+    await update.message.reply_text("Please reply to this message with the TXT file containing the credit card details.")
+
 async def process_cards(update: Update, context: CallbackContext):
+    reply_to_message = update.message.reply_to_message
+    if not reply_to_message or reply_to_message.text != "Please reply to this message with the TXT file containing the credit card details.":
+        await update.message.reply_text("Please send the TXT file as a reply to the bot's request message.")
+        return
+    
     document = update.message.document
     if not document or document.mime_type != 'text/plain':
         await update.message.reply_text("Please upload a valid TXT file.")
@@ -90,8 +98,11 @@ def main():
     bot_token = "7266886772:AAEhY-yWQSEu7mxMWkJCJyesK_qgqPZlPks"
     application = Application.builder().token(bot_token).build()
 
-    # Handle command for file input
-    application.add_handler(CommandHandler("CVV", process_cards))
+    # Command to request file
+    application.add_handler(CommandHandler("CVV", request_file))
+    
+    # Handle file replies
+    application.add_handler(MessageHandler(filters.Document.MimeType("text/plain") & filters.Reply, process_cards))
 
     application.run_polling()
 
