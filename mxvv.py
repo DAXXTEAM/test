@@ -84,7 +84,7 @@ async def xvv(update: Update, context: CallbackContext):
 def main():
     bot_token = "7266886772:AAFbSsQc2EiIXZ5XBoU2H7m9ci6mevp7LKQ"
     application = Application.builder().token(bot_token).build()
-    application.add_handler(CommandHandler("mxvv", mxvv))
+    application.add_handler(CommandHandler("mxvv", xvv))
     application.run_polling()
 
 if __name__ == "__main__":
