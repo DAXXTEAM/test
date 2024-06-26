@@ -110,7 +110,7 @@ async def xvv(update: Update, context: CallbackContext):
     await check_cc(formatted_cc, amount, currency, bot, chat_id, username, vip_status)
 
 def main():
-    bot_token = "7266886772:AAFbSsQc2EiIXZ5XBoU2H7m9ci6mevp7LKQ"
+    bot_token = "7266886772:AAEhY-yWQSEu7mxMWkJCJyesK_qgqPZlPks"
     application = Application.builder().token(bot_token).build()
     application.add_handler(CommandHandler("xvv", xvv))
     application.run_polling()
