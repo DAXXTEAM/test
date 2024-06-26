@@ -16,7 +16,7 @@ async def check_cc(cc, amount, currency, bot, chat_id, username, vip_status, ret
     url = "https://api.mvy.ai/"
     params = {
         "lista": cc,
-        "sk": "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",
+        "sk": "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",
         "amount": amount,
         "currency": currency,
     }
